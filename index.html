@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>MQTT Client</title>
+</head>
+
+<body>
+    <h1>MQTT Client</h1>
+    <p>Subscribe (or not) to any of the following topics to receive messages about it:</p>
+    <div>
+        <input type="checkbox" id="computer_science" /> <span>Computer science</span>
+        <input type="checkbox" id="finances" /> <span>Finances</span>
+        <input type="checkbox" id="politics" /> <span>Politics</span>
+    </div>
+
+    <p>Messages</p>
+    <div id="results" style="border:1px solid #ccc;padding: 5px;width:300px;height:200px;overflow:scroll"></div>
+
+    <script language="javascript">
+        var connection = new WebSocket('ws://localhost:8080/testing');
+        connection.onopen = function(){
+            console.log('Connection open!');
+        }
+        connection.onclose = function(){
+            console.log('Connection closed');
+        }
+        connection.onmessage = function(e){
+            var server_message = e.data;
+            console.log(server_message);
+            document.getElementById("results").innerHTML += server_message + "<br>";
+        }
+
+        var checkboxes = document.querySelectorAll("input[type=checkbox]");
+        for(check of checkboxes) {
+            check.addEventListener("change", (e) => {
+                console.log(e.target.id)
+                let type = e.target.checked == true ? "subscribe" : "unsubscribe";
+                connection.send(JSON.stringify({
+                    type,
+                    topic: e.target.id
+                }));
+            });
+        }
+    </script>
+</body>
+</html>
